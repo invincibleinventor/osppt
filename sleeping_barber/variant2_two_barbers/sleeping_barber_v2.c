@@ -128,7 +128,7 @@ void *generator_thread(void *arg) {
     pthread_t customers[num_customers];
 
     for (int i = 0; i < num_customers; i++) {
-        sleep(1 + rand() % 2);
+        usleep(rand() % 1000000);
         int *id = malloc(sizeof(int));
         *id = i + 1;
         log_line(log_events, CLR_CYAN, "Customer %d arrives at the shop", *id);

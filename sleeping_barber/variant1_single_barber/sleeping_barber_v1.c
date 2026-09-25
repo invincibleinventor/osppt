@@ -124,7 +124,7 @@ void *generator_thread(void *arg) {
     pthread_t customers[num_customers];
 
     for (int i = 0; i < num_customers; i++) {
-        sleep(1 + rand() % 2);
+        usleep(rand() % 1000000);
         int *id = malloc(sizeof(int));
         *id = i + 1;
         log_line(log_events, CLR_CYAN, "Customer %d arrives at the shop", *id);
@@ -164,6 +164,21 @@ void close_logs(void) {
     fclose(log_room);
 }
 
+void print_log_file(const char *title, const char *path) {
+    FILE *log = fopen(path, "r");
+    char line[512];
+
+    if (!log) {
+        perror(path);
+        return;
+    }
+
+    printf(CLR_CYAN "\n-- %s --\n" CLR_RESET, title);
+    while (fgets(line, sizeof(line), log))
+        fputs(line, stdout);
+    fclose(log);
+}
+
 void run_simulation(void) {
     system("mkdir -p logs");
     reset_logs();
@@ -200,6 +215,11 @@ void run_simulation(void) {
     printf(CLR_GREEN "\nSimulation finished.\n" CLR_RESET);
     printf("Customers served: %d\n", total_served);
     printf("Customers turned away: %d\n\n", total_left);
+    printf(CLR_GREEN "Simulation details" CLR_RESET "\n");
+    print_log_file("Shop Events", "logs/events.log");
+    print_log_file("Barber Status", "logs/barber.log");
+    print_log_file("Waiting Room", "logs/waiting_room.log");
+    printf("\n");
 }
 
 void print_banner(void) {

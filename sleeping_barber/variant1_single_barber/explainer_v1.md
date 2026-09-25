@@ -79,8 +79,8 @@ can't be interleaved between two threads and lose an update.
      - If no: unlocks and logs leaving — the classic "shop is full"
        case.
 
-5. **`generator_thread()`** creates one customer thread every 1–2
-   seconds, waits for all of them to finish (served or turned away),
+5. **`generator_thread()`** creates one customer thread after a random
+   delay of up to one second, waits for all of them to finish (served or turned away),
    then sets `shop_open = 0` and posts `customers_sem` one more time so
    the barber (who might be asleep waiting for a customer that will
    never come) wakes up, sees the shop is closed with nobody waiting,
