@@ -1,0 +1,16 @@
+[1;34m[12:59:04] Barber 1 is sleeping (no customers)...[0m
+[1;34m[12:59:04] Barber 2 is sleeping (no customers)...[0m
+[1;32m[12:59:04] Barber 1 woke up and is cutting hair[0m
+[1;32m[12:59:05] Barber 2 woke up and is cutting hair[0m
+[1;35m[12:59:05] Barber 1 finished a haircut[0m
+[1;34m[12:59:05] Barber 1 is sleeping (no customers)...[0m
+[1;32m[12:59:05] Barber 1 woke up and is cutting hair[0m
+[1;35m[12:59:08] Barber 2 finished a haircut[0m
+[1;34m[12:59:08] Barber 2 is sleeping (no customers)...[0m
+[1;32m[12:59:08] Barber 2 woke up and is cutting hair[0m
+[1;35m[12:59:08] Barber 1 finished a haircut[0m
+[1;34m[12:59:08] Barber 1 is sleeping (no customers)...[0m
+[1;31m[12:59:08] Shop is closed, barber 1 goes home[0m
+[1;35m[12:59:10] Barber 2 finished a haircut[0m
+[1;34m[12:59:10] Barber 2 is sleeping (no customers)...[0m
+[1;31m[12:59:10] Shop is closed, barber 2 goes home[0m
