@@ -1,0 +1,24 @@
+[1;32m[09:40:13] Barber 1 is asleep, no customers waiting[0m
+[1;32m[09:40:13] Barber 2 is asleep, no customers waiting[0m
+[1;32m[09:40:26] Barber 1 calls Customer 1 to the chair[0m
+[1;32m[09:40:26] Barber 2 calls Customer 2 to the chair[0m
+[1;32m[09:40:26] Barber 1 begins cutting Customer 1's hair[0m
+[1;32m[09:40:28] Barber 1 finishes Customer 1's haircut[0m
+[1;32m[09:40:28] Barber 1 is asleep, no customers waiting[0m
+[1;32m[09:40:28] Barber 2 begins cutting Customer 2's hair[0m
+[1;32m[09:40:30] Barber 2 finishes Customer 2's haircut[0m
+[1;32m[09:40:30] Barber 2 is asleep, no customers waiting[0m
+[1;32m[09:40:41] Barber 1 calls Customer 3 to the chair[0m
+[1;32m[09:40:41] Barber 1 begins cutting Customer 3's hair[0m
+[1;32m[09:40:42] Barber 2 calls Customer 4 to the chair[0m
+[1;32m[09:40:43] Barber 1 finishes Customer 3's haircut[0m
+[1;32m[09:40:43] Barber 1 is asleep, no customers waiting[0m
+[1;32m[09:40:43] Barber 1 calls Customer 5 to the chair[0m
+[1;32m[09:40:43] Barber 2 begins cutting Customer 4's hair[0m
+[1;32m[09:40:45] Barber 2 finishes Customer 4's haircut[0m
+[1;32m[09:40:45] Barber 2 is asleep, no customers waiting[0m
+[1;32m[09:40:45] Barber 1 begins cutting Customer 5's hair[0m
+[1;32m[09:40:47] Barber 1 finishes Customer 5's haircut[0m
+[1;32m[09:40:47] Barber 1 is asleep, no customers waiting[0m
+[1;32m[09:40:53] Shop closed, Barber 1 goes home[0m
+[1;32m[09:40:53] Shop closed, Barber 2 goes home[0m

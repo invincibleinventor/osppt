@@ -1,0 +1,50 @@
+[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;31m[C1] [0m[1;32m[  ] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;31m[C1] [0m[1;31m[C2] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m[09:40:26] [1;33m[09:40:26] Customer 1 takes a chair[0m
+Customer 2 takes a chair[0m
+[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;32m[  ] [0m[1;31m[C2] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;32m[  ] [0m[1;32m[  ] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m[09:40:26] Customer 1 moves to the barber chair[0m
+[1;33m[09:40:26] Customer 2 moves to the barber chair[0m
+[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;31m[C3] [0m[1;32m[  ] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m[09:40:41] Customer 3 takes a chair[0m
+[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;32m[  ] [0m[1;32m[  ] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m[09:40:41] Customer 3 moves to the barber chair[0m
+[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;31m[C4] [0m[1;32m[  ] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m[09:40:42] Customer 4 takes a chair[0m
+[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;32m[  ] [0m[1;32m[  ] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m[09:40:42] Customer 4 moves to the barber chair[0m
+[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;31m[C5] [0m[1;32m[  ] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m[09:40:43] Customer 5 takes a chair[0m
+[1;33m+---- BARBER CHAIRS ----+
+[0m| [1;32m[  ] [0m[1;32m[  ] [0m|
+[1;33m+------------------------+
+
+[0m[1;33m[09:40:43] Customer 5 moves to the barber chair[0m

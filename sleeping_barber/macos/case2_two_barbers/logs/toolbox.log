@@ -1,0 +1,84 @@
+[1;36m[09:40:26] Barber 1 requests the toolset (ticket 0)[0m
+[1;36m[09:40:26] Barber 1 picks up comb then scissors (fixed order) - ticket 0 served[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;31mBarber 1[0m
+| Now serving ticket: 0 (next: 1)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:26] Barber 2 requests the toolset (ticket 1)[0m
+[1;36m[09:40:26] Barber 2 waits in the tool queue behind ticket 0[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;31mBarber 1[0m
+| Now serving ticket: 0 (next: 2)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:28] Barber 1 returns the toolset[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;32mnobody[0m
+| Now serving ticket: 1 (next: 2)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:28] Barber 2 picks up comb then scissors (fixed order) - ticket 1 served[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;31mBarber 2[0m
+| Now serving ticket: 1 (next: 2)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:30] Barber 2 returns the toolset[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;32mnobody[0m
+| Now serving ticket: 2 (next: 2)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:41] Barber 1 requests the toolset (ticket 2)[0m
+[1;36m[09:40:41] Barber 1 picks up comb then scissors (fixed order) - ticket 2 served[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;31mBarber 1[0m
+| Now serving ticket: 2 (next: 3)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:42] Barber 2 requests the toolset (ticket 3)[0m
+[1;36m[09:40:42] Barber 2 waits in the tool queue behind ticket 2[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;31mBarber 1[0m
+| Now serving ticket: 2 (next: 4)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:43] Barber 1 returns the toolset[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;32mnobody[0m
+| Now serving ticket: 3 (next: 4)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:43] Barber 2 picks up comb then scissors (fixed order) - ticket 3 served[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;31mBarber 2[0m
+| Now serving ticket: 3 (next: 4)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:43] Barber 1 requests the toolset (ticket 4)[0m
+[1;36m[09:40:43] Barber 1 waits in the tool queue behind ticket 3[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;31mBarber 2[0m
+| Now serving ticket: 3 (next: 5)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:45] Barber 2 returns the toolset[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;32mnobody[0m
+| Now serving ticket: 4 (next: 5)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:45] Barber 1 picks up comb then scissors (fixed order) - ticket 4 served[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;31mBarber 1[0m
+| Now serving ticket: 4 (next: 5)
+[1;33m+------------------------------+
+
+[0m[1;36m[09:40:47] Barber 1 returns the toolset[0m
+[1;33m+---------- TOOLBOX ----------+
+[0m| Held by: [1;32mnobody[0m
+| Now serving ticket: 5 (next: 5)
+[1;33m+------------------------------+
+
+[0m
