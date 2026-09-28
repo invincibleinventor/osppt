@@ -19,13 +19,15 @@
 typedef struct {
     int occupied;
     int id;
-    int priority;     /* 0 = normal, 1 = called ahead of normal customers */
+    int priority;     /* higher = called sooner; equal priority falls back to FCFS */
+    int seq;          /* arrival order, used to break priority ties (FCFS) */
     sem_t *turn;       /* this occupant's personal "you're up" semaphore  */
 } chair_t;
 
 chair_t chairs[CHAIRS];
 sem_t *waiting_manager;   /* customer -> barber: "someone is waiting" */
 pthread_mutex_t chair_lock;
+int arrival_seq = 0;      /* monotonic counter, assigned under chair_lock when a customer sits down */
 
 void show_chairs(void);
 void log_room(const char *fmt, ...);
@@ -58,10 +60,13 @@ void *barber(void *arg) {
 
         pthread_mutex_lock(&chair_lock);
         int winner = -1;
-        for (int i = 0; i < CHAIRS; i++)
-            if (chairs[i].occupied &&
-                (winner == -1 || chairs[i].priority > chairs[winner].priority))
+        for (int i = 0; i < CHAIRS; i++) {
+            if (!chairs[i].occupied) continue;
+            if (winner == -1
+                || chairs[i].priority > chairs[winner].priority
+                || (chairs[i].priority == chairs[winner].priority && chairs[i].seq < chairs[winner].seq))
                 winner = i;
+        }
 
         if (winner == -1) {   /* nobody waiting: this was the shutdown post */
             pthread_mutex_unlock(&chair_lock);
@@ -117,6 +122,7 @@ void *customer(void *arg) {
     chairs[slot].occupied = 1;
     chairs[slot].id = id;
     chairs[slot].priority = priority;
+    chairs[slot].seq = arrival_seq++;
     chairs[slot].turn = my_turn;
     show_chairs();
     pthread_mutex_unlock(&chair_lock);
@@ -138,6 +144,11 @@ int main(void) {
     setup_display();
 
     pthread_mutex_init(&chair_lock, NULL);
+    /* Unlink first: if a previous run was killed before it could
+     * sem_unlink this name, O_EXCL below would fail on a stale
+     * leftover semaphore (wrong count) instead of creating a fresh
+     * one at 0, making the barber think a customer already posted. */
+    sem_unlink("/sb_case1_waiting_manager");
     waiting_manager = sem_open("/sb_case1_waiting_manager", O_CREAT | O_EXCL, 0644, 0);
 
     pthread_t barber_t;
@@ -146,32 +157,63 @@ int main(void) {
     pthread_t customer_threads[MAX_CUSTOMERS];
     int customer_count = 0;
     int next_id = 1;
-    int choice;
 
+    printf("\n=== Sleeping Barber - Case 1 (1 barber, %d chairs) ===\n", CHAIRS);
+
+    /* Seed the waiting room before the shop "opens" - e.g. enter CHAIRS-1
+     * here to leave exactly one vacancy, then send 2 arrivals in the
+     * first round below to make them race for that last seat. */
+    int initial;
     do {
-        printf("\n=== Sleeping Barber - Case 1 (1 barber, 3 chairs) ===\n");
-        printf("1) A customer arrives\n");
-        printf("2) A customer arrives and is prioritized ahead of those waiting\n");
-        printf("3) Two customers arrive at the same time, racing for one seat\n");
-        printf("4) Close the shop and exit\n");
-        printf("Choose: ");
-        if (scanf("%d", &choice) != 1) {
-            while (getchar() != '\n') { }
-            continue;
-        }
+        printf("Customers already in the waiting room at open (0-%d): ", CHAIRS);
+        if (scanf("%d", &initial) != 1) { while (getchar() != '\n') { } initial = -1; }
+    } while (initial < 0 || initial > CHAIRS);
 
-        if (choice == 1 && customer_count < MAX_CUSTOMERS) {
-            spawn_customer(&customer_threads[customer_count++], customer, next_id++, 0, 0);
-        } else if (choice == 2 && customer_count < MAX_CUSTOMERS) {
-            spawn_customer(&customer_threads[customer_count++], customer, next_id++, 1, 0);
-        } else if (choice == 3 && customer_count + 1 < MAX_CUSTOMERS) {
-            log_tx("Customer %d and Customer %d arrive at the same time", next_id, next_id + 1);
-            spawn_customer(&customer_threads[customer_count++], customer, next_id++, 0, 1);
-            spawn_customer(&customer_threads[customer_count++], customer, next_id++, 0, 1);
-        } else if (choice != 4) {
-            printf("Invalid choice.\n");
+    for (int i = 0; i < initial; i++) {
+        int prio;
+        printf("  Priority for customer %d (0 = normal, higher = served sooner): ", next_id);
+        if (scanf("%d", &prio) != 1) { while (getchar() != '\n') { } prio = 0; }
+        spawn_customer(&customer_threads[customer_count++], customer, next_id++, prio, 0);
+    }
+
+    /* Each round: how many customers arrive together this time. 1 is a
+     * plain arrival; 2 or more spawns that many customer threads at the
+     * same instant, so they genuinely race for whatever chairs are free
+     * right then - real contention, not a scripted outcome. 0 closes
+     * the shop. */
+    int n;
+    do {
+        printf("\nCustomers arriving this round (0 to close the shop): ");
+        if (scanf("%d", &n) != 1) { while (getchar() != '\n') { } continue; }
+        if (n < 0) { printf("Invalid input.\n"); continue; }
+        if (n == 0) break;
+
+        if (n > 1)
+            log_tx("Customer %d through Customer %d arrive at the same time", next_id, next_id + n - 1);
+
+        /* Collect every priority in this round BEFORE spawning any
+         * thread. Interleaving "ask priority, spawn, ask priority,
+         * spawn" would space the spawns out by however long typing
+         * takes, giving the barber time to call and free each chair
+         * between them - defeating the whole point of "arrive at the
+         * same time". Asking everything up front lets the spawn loop
+         * below fire all n threads back-to-back with nothing between
+         * them, so they actually race. */
+        int round_ids[MAX_CUSTOMERS], round_prios[MAX_CUSTOMERS];
+        int round_count = 0;
+        for (int i = 0; i < n && customer_count + round_count < MAX_CUSTOMERS; i++) {
+            int prio;
+            printf("  Priority for customer %d (0 = normal, higher = served sooner): ", next_id + i);
+            if (scanf("%d", &prio) != 1) { while (getchar() != '\n') { } prio = 0; }
+            round_ids[round_count] = next_id + i;
+            round_prios[round_count] = prio;
+            round_count++;
         }
-    } while (choice != 4);
+        next_id += round_count;
+
+        for (int i = 0; i < round_count; i++)
+            spawn_customer(&customer_threads[customer_count++], customer, round_ids[i], round_prios[i], n > 1);
+    } while (1);
 
     for (int i = 0; i < customer_count; i++)
         pthread_join(customer_threads[i], NULL);
@@ -240,14 +282,37 @@ void show_chairs(void) {
     fflush(f_room);
 }
 
-static void spawn_terminal(const char *title, const char *logfile) {
-    char cmd[512];
+static void get_screen_size(int *w, int *h) {
+    *w = 1440; *h = 900;   /* fallback if the query below fails for any reason */
+    /* JXA reads NSScreen directly - unlike "Finder ... window of desktop",
+     * it doesn't depend on Finder having a desktop window object, which
+     * fails intermittently with error -1728 on some setups. */
+    FILE *p = popen("osascript -l JavaScript -e "
+        "'ObjC.import(\"AppKit\"); var f = $.NSScreen.mainScreen.frame; "
+        "f.size.width + \",\" + f.size.height' 2>/dev/null", "r");
+    if (!p) return;
+    int a, b;
+    if (fscanf(p, "%d,%d", &a, &b) == 2) { *w = a; *h = b; }
+    pclose(p);
+}
+
+/* quadrant: 0=top-left, 1=top-right, 2=bottom-left, 3=bottom-right */
+static void spawn_terminal(const char *title, const char *logfile, int quadrant) {
+    static int screen_w = 0, screen_h = 0;
+    if (screen_w == 0) get_screen_size(&screen_w, &screen_h);
+    int x1 = (quadrant % 2) * (screen_w / 2);
+    int y1 = (quadrant / 2) * (screen_h / 2);
+    int x2 = x1 + screen_w / 2;
+    int y2 = y1 + screen_h / 2;
+
+    char cmd[768];
     snprintf(cmd, sizeof(cmd),
         "osascript -e 'tell application \"Terminal\" to do script "
         "\"clear; tail -f %s\"' "
         "-e 'tell application \"Terminal\" to set custom title of front window to \"%s\"' "
+        "-e 'tell application \"Terminal\" to set bounds of front window to {%d, %d, %d, %d}' "
         "> /dev/null 2>&1 &",
-        logfile, title);
+        logfile, title, x1, y1, x2, y2);
     system(cmd);
 }
 
@@ -267,9 +332,9 @@ void setup_display(void) {
     f_room   = fopen(room_path, "w");
     f_barber = fopen(barber_path, "w");
     f_tx     = fopen(tx_path, "w");
-    spawn_terminal("Waiting Room", room_path);
-    spawn_terminal("Barber Shop", barber_path);
-    spawn_terminal("Transactions", tx_path);
+    spawn_terminal("Waiting Room", room_path, 0);
+    spawn_terminal("Barber Shop", barber_path, 1);
+    spawn_terminal("Transactions", tx_path, 2);
     sleep(1);
 }
 
