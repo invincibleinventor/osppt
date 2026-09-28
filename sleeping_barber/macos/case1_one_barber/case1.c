@@ -140,6 +140,19 @@ void *customer(void *arg) {
     return NULL;
 }
 
+/* Returns 1 with *out set on success, 0 after invalid non-numeric input
+ * (already drained to the next line), or -1 on EOF. The EOF case matters
+ * because the drain loop below reads until '\n', and at EOF getchar()
+ * keeps returning EOF forever, never '\n' - without checking for it here
+ * a closed stdin (e.g. piped input running out) would spin the caller
+ * forever instead of closing the shop. */
+static int read_int(int *out) {
+    if (scanf("%d", out) == 1) return 1;
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
+    return (c == EOF) ? -1 : 0;
+}
+
 int main(void) {
     setup_display();
 
@@ -166,13 +179,15 @@ int main(void) {
     int initial;
     do {
         printf("Customers already in the waiting room at open (0-%d): ", CHAIRS);
-        if (scanf("%d", &initial) != 1) { while (getchar() != '\n') { } initial = -1; }
+        int r = read_int(&initial);
+        if (r == -1) { initial = 0; break; }   /* stdin closed: open with an empty room */
+        if (r == 0) { initial = -1; }
     } while (initial < 0 || initial > CHAIRS);
 
     for (int i = 0; i < initial; i++) {
         int prio;
         printf("  Priority for customer %d (0 = normal, higher = served sooner): ", next_id);
-        if (scanf("%d", &prio) != 1) { while (getchar() != '\n') { } prio = 0; }
+        if (read_int(&prio) != 1) prio = 0;
         spawn_customer(&customer_threads[customer_count++], customer, next_id++, prio, 0);
     }
 
@@ -184,12 +199,11 @@ int main(void) {
     int n;
     do {
         printf("\nCustomers arriving this round (0 to close the shop): ");
-        if (scanf("%d", &n) != 1) { while (getchar() != '\n') { } continue; }
+        int r = read_int(&n);
+        if (r == -1) break;   /* stdin closed: close the shop */
+        if (r == 0) continue;
         if (n < 0) { printf("Invalid input.\n"); continue; }
         if (n == 0) break;
-
-        if (n > 1)
-            log_tx("Customer %d through Customer %d arrive at the same time", next_id, next_id + n - 1);
 
         /* Collect every priority in this round BEFORE spawning any
          * thread. Interleaving "ask priority, spawn, ask priority,
@@ -204,15 +218,22 @@ int main(void) {
         for (int i = 0; i < n && customer_count + round_count < MAX_CUSTOMERS; i++) {
             int prio;
             printf("  Priority for customer %d (0 = normal, higher = served sooner): ", next_id + i);
-            if (scanf("%d", &prio) != 1) { while (getchar() != '\n') { } prio = 0; }
+            if (read_int(&prio) != 1) prio = 0;
             round_ids[round_count] = next_id + i;
             round_prios[round_count] = prio;
             round_count++;
         }
         next_id += round_count;
 
+        /* Logged with the actual spawned count, not the requested n -
+         * if MAX_CUSTOMERS capped round_count below n, the announcement
+         * must match who really shows up, not who was asked for. */
+        if (round_count > 1)
+            log_tx("Customer %d through Customer %d arrive at the same time",
+                   round_ids[0], round_ids[round_count - 1]);
+
         for (int i = 0; i < round_count; i++)
-            spawn_customer(&customer_threads[customer_count++], customer, round_ids[i], round_prios[i], n > 1);
+            spawn_customer(&customer_threads[customer_count++], customer, round_ids[i], round_prios[i], round_count > 1);
     } while (1);
 
     for (int i = 0; i < customer_count; i++)
