@@ -64,24 +64,39 @@ The file is split into two halves:
 4. Frees the winner's chair *immediately* (the chair models the waiting
    room, not the barber's own chair — the customer has now moved), then
    posts that customer's personal `turn` semaphore.
-5. Sleeps 2 seconds to simulate the haircut, then loops back.
+5. Sleeps 10 seconds to simulate the haircut, then loops back. This is
+   deliberately long: a chair frees the instant the barber *calls* that
+   customer, not after the haircut finishes, so an idle barber empties
+   the waiting room almost instantly. 10 seconds gives you a real
+   window to type a round's preset count, priorities, and arrival count
+   before the barber calls anyone else and the room drains — short
+   enough (e.g. `sleep(2)`) and every preset customer you seed is gone
+   again before you finish typing the rest of that round.
 
-## Interactive menu: seeding + rounds
+## Interactive menu: preset + arrivals, every round
 
-Instead of a fixed scripted sequence, `main()` asks two things:
+Instead of a fixed scripted sequence, `main()` asks two things on
+*every* iteration of the round loop — not just once at open:
 
-1. **Initial occupancy** — how many customers are already seated when
-   the shop "opens" (0 to `CHAIRS`), with a priority prompt for each.
-   Seeding `CHAIRS - 1` here leaves exactly one vacancy.
-2. **Rounds** — repeatedly asks how many customers arrive together this
-   round. All `n` of that round's customer threads are spawned
-   back-to-back with no delay between them, so contention is genuine,
-   not scripted:
+1. **Preset occupancy** — how many customers are already sitting in the
+   waiting room before this round's arrivals show up (0 to `CHAIRS`),
+   with a priority prompt for each. These are spawned one at a time, no
+   contention. Asking this fresh each round lets you dial up a
+   near-full room (e.g. `CHAIRS - 1`) right before sending in a
+   simultaneous batch, instead of only being able to set the starting
+   state once.
+2. **Arrivals** — how many customers arrive together this round. All
+   `n` of that round's customer threads are spawned back-to-back with
+   no delay between them, so contention is genuine, not scripted:
    - `n == 1` — a plain arrival.
    - `n >= 2` — those threads race each other for whatever chairs are
      actually free at that instant. If only one vacancy exists, exactly
      one of them wins it and the other logs a rejection — this is the
-     "one vacancy, two customers fighting for it" scenario.
+     "one vacancy, two customers fighting for it" scenario. When a
+     round is contested this way, `customer()` also logs each
+     competing customer requesting, acquiring, and releasing
+     `chair_lock` explicitly, so the mutex serialization is visible in
+     the waiting-room log, not just its outcome.
    - `n == 0` — closes the shop and ends the round loop.
 
 Because the mutex serializes the check-and-claim sequence in

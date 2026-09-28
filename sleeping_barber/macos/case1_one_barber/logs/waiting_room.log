@@ -26,8 +26,7 @@
 [0m| [1;31m[C4]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
 [1;33m+-----------------------------------+
 
-[0m[1;33m[09:38:40] Customer 4 wins the race and takes the last chair[0m
-[1;33m+---------- WAITING ROOM ----------+
+[0m[1;33m+---------- WAITING ROOM ----------+
 [0m| [1;32m[  ]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
 [1;33m+-----------------------------------+
 
@@ -35,8 +34,7 @@
 [0m| [1;31m[C5]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
 [1;33m+-----------------------------------+
 
-[0m[1;33m[09:38:45] Customer 5 wins the race and takes the last chair[0m
-[1;33m+---------- WAITING ROOM ----------+
+[0m[1;33m+---------- WAITING ROOM ----------+
 [0m| [1;32m[  ]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
 [1;33m+-----------------------------------+
 
@@ -44,8 +42,7 @@
 [0m| [1;31m[C6]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
 [1;33m+-----------------------------------+
 
-[0m[1;33m[09:38:45] Customer 6 wins the race and takes the last chair[0m
-[1;33m+---------- WAITING ROOM ----------+
+[0m[1;33m+---------- WAITING ROOM ----------+
 [0m| [1;32m[  ]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
 [1;33m+-----------------------------------+
 
@@ -53,8 +50,31 @@
 [0m| [1;31m[C7]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
 [1;33m+-----------------------------------+
 
-[0m[1;33m[09:38:47] Customer 7 wins the race and takes the last chair[0m
+[0m[1;33m+---------- WAITING ROOM ----------+
+[0m| [1;32m[  ]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
+[1;33m+-----------------------------------+
+
+[0m[1;33m[10:11:42] Customer 8 requests the waiting room lock[0m
+[1;33m[10:11:42] Customer 8 acquires the waiting room lock and enters[0m
 [1;33m+---------- WAITING ROOM ----------+
+[0m| [1;31m[C8]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
+[1;33m+-----------------------------------+
+
+[0m[1;33m[10:11:42] Customer 8 releases the waiting room lock[0m
+[1;33m[10:11:42] Customer 9 requests the waiting room lock[0m
+[1;33m[10:11:42] Customer 9 acquires the waiting room lock and enters[0m
+[1;33m+---------- WAITING ROOM ----------+
+[0m| [1;31m[C8]  [0m[1;31m[C9]  [0m[1;32m[  ]  [0m|
+[1;33m+-----------------------------------+
+
+[0m[1;33m[10:11:42] Customer 9 releases the waiting room lock[0m
+[1;33m[10:11:42] Customer 8 wins the race and takes the last chair[0m
+[1;33m[10:11:42] Customer 9 wins the race and takes the last chair[0m
+[1;33m+---------- WAITING ROOM ----------+
+[0m| [1;32m[  ]  [0m[1;31m[C9]  [0m[1;32m[  ]  [0m|
+[1;33m+-----------------------------------+
+
+[0m[1;33m+---------- WAITING ROOM ----------+
 [0m| [1;32m[  ]  [0m[1;32m[  ]  [0m[1;32m[  ]  [0m|
 [1;33m+-----------------------------------+
 

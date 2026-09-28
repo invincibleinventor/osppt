@@ -145,7 +145,7 @@ void *barber(void *arg) {
 
         log_barber("Barber calls Customer %d in for a haircut", called_id);
         sem_post(called_turn);   // wake up exactly this customer, no one else
-        sleep(2);                 // simulate the haircut taking 2 seconds
+        sleep(10);   // long enough that a human typing the next round's preset/arrival prompts can land inside this window before the barber calls anyone else and empties the room
         log_barber("Barber finishes Customer %d's haircut", called_id);
     }
     log_barber("Shop closed, barber goes home");
@@ -169,7 +169,14 @@ void *customer(void *arg) {
     sem_unlink(sem_name);   // clean up if a previous run crashed and left this behind
     sem_t *my_turn = sem_open(sem_name, O_CREAT | O_EXCL, 0644, 0);
 
+    // Log the request/acquire/release explicitly when this customer is
+    // part of a contested round, so a demo can show the mutex actually
+    // serializing two simultaneous arrivals instead of just the outcome.
+    if (contested)
+        log_room("Customer %d requests the waiting room lock", id);
     pthread_mutex_lock(&chair_lock);
+    if (contested)
+        log_room("Customer %d acquires the waiting room lock and enters", id);
 
     /* Look for the first free chair. This whole search-and-claim runs
      * while holding chair_lock, so even if two customers call this
@@ -187,6 +194,8 @@ void *customer(void *arg) {
     if (slot == -1) {
         /* No free chair - this customer leaves immediately, exactly
          * like the classic problem describes. */
+        if (contested)
+            log_room("Customer %d releases the waiting room lock (no free chair)", id);
         pthread_mutex_unlock(&chair_lock);
         log_tx("Customer %d finds no free chair and leaves", id);
         if (contested)
@@ -202,6 +211,8 @@ void *customer(void *arg) {
     chairs[slot].seq = arrival_seq++;   /* stamps this seat with its arrival order, for FCFS tie-breaks */
     chairs[slot].turn = my_turn;
     show_chairs();
+    if (contested)
+        log_room("Customer %d releases the waiting room lock", id);
     pthread_mutex_unlock(&chair_lock);
 
     log_tx("Customer %d takes a seat in the waiting room", id);
@@ -254,37 +265,39 @@ int main(void) {
 
     printf("\n=== Sleeping Barber - Case 1 (1 barber, %d chairs) ===\n", CHAIRS);
 
-    /* Instead of a fixed menu of canned scenarios, the presenter first
-     * seeds the waiting room directly - e.g. entering CHAIRS-1 here
-     * leaves exactly one vacancy, which the next round's arrivals can
-     * then fight over. Priority is asked per customer since it's what
-     * drives who the barber calls next. */
-    int initial;
-    do {
-        printf("Customers already in the waiting room at open (0-%d): ", CHAIRS);
-        int r = read_int(&initial);
-        if (r == -1) { initial = 0; break; }   // stdin closed: open with an empty room
-        if (r == 0) { initial = -1; }
-    } while (initial < 0 || initial > CHAIRS);
-
-    for (int i = 0; i < initial; i++) {
-        int prio;
-        printf("  Priority for customer %d (0 = normal, higher = served sooner): ", next_id);
-        if (read_int(&prio) != 1) prio = 0;
-        spawn_customer(&customer_threads[customer_count++], customer, next_id++, prio, 0);
-    }
-
-    /* Each round asks how many customers arrive together this time.
-     * Zero delay between the spawn_customer() calls in a round of size
-     * >1 is the point - those threads enter customer() at essentially
-     * the same instant and genuinely race for chair_lock over whatever
-     * chairs happen to be free right then, exactly like customers 5/6
-     * in the original scripted version, except now the presenter
-     * chooses when it happens instead of it being hardcoded. 0 closes
-     * the shop. */
+    /* Instead of a fixed menu of canned scenarios, the presenter seeds
+     * the waiting room directly every round - not just once at open -
+     * so a near-full room can be dialed up right before the next
+     * round's simultaneous arrivals, to make them fight over the last
+     * seat on demand. Priority is asked per customer since it's what
+     * drives who the barber calls next. These preset customers are
+     * spawned one at a time - only the round's own arrivals below race
+     * each other. */
     int n;
     do {
-        printf("\nCustomers arriving this round (0 to close the shop): ");
+        int preset;
+        do {
+            printf("\nCustomers already waiting before this round (0-%d): ", CHAIRS);
+            int r = read_int(&preset);
+            if (r == -1) { preset = 0; break; }   // stdin closed: skip preset, arrival prompt below will also hit EOF and close the shop
+            if (r == 0) { preset = -1; }
+        } while (preset < 0 || preset > CHAIRS);
+
+        for (int i = 0; i < preset && customer_count < MAX_CUSTOMERS; i++) {
+            int prio;
+            printf("  Priority for customer %d (0 = normal, higher = served sooner): ", next_id);
+            if (read_int(&prio) != 1) prio = 0;
+            spawn_customer(&customer_threads[customer_count++], customer, next_id++, prio, 0);
+        }
+
+        /* Zero delay between the spawn_customer() calls in a round of
+         * size >1 is the point - those threads enter customer() at
+         * essentially the same instant and genuinely race for
+         * chair_lock over whatever chairs happen to be free right then,
+         * exactly like customers 5/6 in the original scripted version,
+         * except now the presenter chooses when it happens instead of
+         * it being hardcoded. 0 closes the shop. */
+        printf("Customers arriving this round (0 to close the shop): ");
         int r = read_int(&n);
         if (r == -1) break;   // stdin closed: close the shop
         if (r == 0) continue;

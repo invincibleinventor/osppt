@@ -87,7 +87,7 @@ void *barber(void *arg) {
 
         log_barber("Barber calls Customer %d in for a haircut", called_id);
         sem_post(called_turn);
-        sleep(2);
+        sleep(10);   /* long enough that a human typing the next round's preset/arrival prompts can land inside this window before the barber calls anyone else and empties the room */
         log_barber("Barber finishes Customer %d's haircut", called_id);
     }
     log_barber("Shop closed, barber goes home");
@@ -104,12 +104,19 @@ void *customer(void *arg) {
     sem_unlink(sem_name);
     sem_t *my_turn = sem_open(sem_name, O_CREAT | O_EXCL, 0644, 0);
 
+    if (contested)
+        log_room("Customer %d requests the waiting room lock", id);
     pthread_mutex_lock(&chair_lock);
+    if (contested)
+        log_room("Customer %d acquires the waiting room lock and enters", id);
+
     int slot = -1;
     for (int i = 0; i < CHAIRS; i++)
         if (!chairs[i].occupied) { slot = i; break; }
 
     if (slot == -1) {
+        if (contested)
+            log_room("Customer %d releases the waiting room lock (no free chair)", id);
         pthread_mutex_unlock(&chair_lock);
         log_tx("Customer %d finds no free chair and leaves", id);
         if (contested)
@@ -125,6 +132,8 @@ void *customer(void *arg) {
     chairs[slot].seq = arrival_seq++;
     chairs[slot].turn = my_turn;
     show_chairs();
+    if (contested)
+        log_room("Customer %d releases the waiting room lock", id);
     pthread_mutex_unlock(&chair_lock);
 
     log_tx("Customer %d takes a seat in the waiting room", id);
@@ -173,32 +182,36 @@ int main(void) {
 
     printf("\n=== Sleeping Barber - Case 1 (1 barber, %d chairs) ===\n", CHAIRS);
 
-    /* Seed the waiting room before the shop "opens" - e.g. enter CHAIRS-1
-     * here to leave exactly one vacancy, then send 2 arrivals in the
-     * first round below to make them race for that last seat. */
-    int initial;
-    do {
-        printf("Customers already in the waiting room at open (0-%d): ", CHAIRS);
-        int r = read_int(&initial);
-        if (r == -1) { initial = 0; break; }   /* stdin closed: open with an empty room */
-        if (r == 0) { initial = -1; }
-    } while (initial < 0 || initial > CHAIRS);
-
-    for (int i = 0; i < initial; i++) {
-        int prio;
-        printf("  Priority for customer %d (0 = normal, higher = served sooner): ", next_id);
-        if (read_int(&prio) != 1) prio = 0;
-        spawn_customer(&customer_threads[customer_count++], customer, next_id++, prio, 0);
-    }
-
-    /* Each round: how many customers arrive together this time. 1 is a
-     * plain arrival; 2 or more spawns that many customer threads at the
-     * same instant, so they genuinely race for whatever chairs are free
-     * right then - real contention, not a scripted outcome. 0 closes
-     * the shop. */
+    /* Each round first asks how many customers are already sitting in
+     * the waiting room before this round's arrivals show up - asked
+     * fresh every round, not just once at open, so you can preset a
+     * near-full room (e.g. CHAIRS-1) right before sending in 2+
+     * simultaneous arrivals to race for the last seat. These preset
+     * customers are spawned one at a time with no contention, exactly
+     * like the round's arrivals used to be seeded at open. Then it asks
+     * how many arrive together this round: 1 is a plain arrival, 2 or
+     * more spawns that many customer threads at the same instant so
+     * they genuinely race for whatever chairs are free right then -
+     * real contention, not a scripted outcome. An arrival count of 0
+     * closes the shop. */
     int n;
     do {
-        printf("\nCustomers arriving this round (0 to close the shop): ");
+        int preset;
+        do {
+            printf("\nCustomers already waiting before this round (0-%d): ", CHAIRS);
+            int r = read_int(&preset);
+            if (r == -1) { preset = 0; break; }   /* stdin closed: skip preset, arrival prompt below will also hit EOF and close the shop */
+            if (r == 0) { preset = -1; }
+        } while (preset < 0 || preset > CHAIRS);
+
+        for (int i = 0; i < preset && customer_count < MAX_CUSTOMERS; i++) {
+            int prio;
+            printf("  Priority for customer %d (0 = normal, higher = served sooner): ", next_id);
+            if (read_int(&prio) != 1) prio = 0;
+            spawn_customer(&customer_threads[customer_count++], customer, next_id++, prio, 0);
+        }
+
+        printf("Customers arriving this round (0 to close the shop): ");
         int r = read_int(&n);
         if (r == -1) break;   /* stdin closed: close the shop */
         if (r == 0) continue;
