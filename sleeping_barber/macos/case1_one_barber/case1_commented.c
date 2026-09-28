@@ -173,10 +173,10 @@ void *customer(void *arg) {
     // part of a contested round, so a demo can show the mutex actually
     // serializing two simultaneous arrivals instead of just the outcome.
     if (contested)
-        log_room("Customer %d requests the waiting room lock", id);
+        log_room("Customer %d requests the chair_lock mutex", id);
     pthread_mutex_lock(&chair_lock);
     if (contested)
-        log_room("Customer %d acquires the waiting room lock and enters", id);
+        log_room("Customer %d acquires the chair_lock mutex and enters the waiting room", id);
 
     /* Look for the first free chair. This whole search-and-claim runs
      * while holding chair_lock, so even if two customers call this
@@ -195,7 +195,7 @@ void *customer(void *arg) {
         /* No free chair - this customer leaves immediately, exactly
          * like the classic problem describes. */
         if (contested)
-            log_room("Customer %d releases the waiting room lock (no free chair)", id);
+            log_room("Customer %d releases the chair_lock mutex (no free chair)", id);
         pthread_mutex_unlock(&chair_lock);
         log_tx("Customer %d finds no free chair and leaves", id);
         if (contested)
@@ -212,7 +212,7 @@ void *customer(void *arg) {
     chairs[slot].turn = my_turn;
     show_chairs();
     if (contested)
-        log_room("Customer %d releases the waiting room lock", id);
+        log_room("Customer %d releases the chair_lock mutex", id);
     pthread_mutex_unlock(&chair_lock);
 
     log_tx("Customer %d takes a seat in the waiting room", id);

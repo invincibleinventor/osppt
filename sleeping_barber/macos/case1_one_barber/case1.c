@@ -105,10 +105,10 @@ void *customer(void *arg) {
     sem_t *my_turn = sem_open(sem_name, O_CREAT | O_EXCL, 0644, 0);
 
     if (contested)
-        log_room("Customer %d requests the waiting room lock", id);
+        log_room("Customer %d requests the chair_lock mutex", id);
     pthread_mutex_lock(&chair_lock);
     if (contested)
-        log_room("Customer %d acquires the waiting room lock and enters", id);
+        log_room("Customer %d acquires the chair_lock mutex and enters the waiting room", id);
 
     int slot = -1;
     for (int i = 0; i < CHAIRS; i++)
@@ -116,7 +116,7 @@ void *customer(void *arg) {
 
     if (slot == -1) {
         if (contested)
-            log_room("Customer %d releases the waiting room lock (no free chair)", id);
+            log_room("Customer %d releases the chair_lock mutex (no free chair)", id);
         pthread_mutex_unlock(&chair_lock);
         log_tx("Customer %d finds no free chair and leaves", id);
         if (contested)
@@ -133,7 +133,7 @@ void *customer(void *arg) {
     chairs[slot].turn = my_turn;
     show_chairs();
     if (contested)
-        log_room("Customer %d releases the waiting room lock", id);
+        log_room("Customer %d releases the chair_lock mutex", id);
     pthread_mutex_unlock(&chair_lock);
 
     log_tx("Customer %d takes a seat in the waiting room", id);
