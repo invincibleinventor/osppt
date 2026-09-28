@@ -1,0 +1,13 @@
+[1;36m[08:24:03] Customer 1 takes a seat in the waiting room[0m
+[1;36m[08:24:03] Customer 1 moves to the barber chair[0m
+[1;36m[08:24:04] Customer 2 takes a seat in the waiting room[0m
+[1;36m[08:24:05] Customer 3 takes a seat in the waiting room[0m
+[1;36m[08:24:05] Customer 3 is prioritized ahead of Customer 2[0m
+[1;36m[08:24:05] Customer 3 moves to the barber chair[0m
+[1;36m[08:24:05] Customer 4 takes a seat in the waiting room[0m
+[1;36m[08:24:06] Customer 5 and Customer 6 arrive at the same time for the last chair[0m
+[1;36m[08:24:06] Customer 5 takes a seat in the waiting room[0m
+[1;36m[08:24:06] Customer 6 finds no free chair and leaves[0m
+[1;36m[08:24:07] Customer 2 moves to the barber chair[0m
+[1;36m[08:24:09] Customer 4 moves to the barber chair[0m
+[1;36m[08:24:11] Customer 5 moves to the barber chair[0m
