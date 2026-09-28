@@ -1,19 +1,14 @@
-[1;36m[10:10:41] Customer 1 takes a seat in the waiting room[0m
-[1;36m[10:10:41] Customer 1 moves to the barber chair[0m
-[1;36m[10:11:11] Customer 2 takes a seat in the waiting room[0m
-[1;36m[10:11:11] Customer 2 moves to the barber chair[0m
-[1;36m[10:11:20] Customer 3 takes a seat in the waiting room[0m
-[1;36m[10:11:20] Customer 3 moves to the barber chair[0m
-[1;36m[10:11:26] Customer 4 takes a seat in the waiting room[0m
-[1;36m[10:11:26] Customer 4 moves to the barber chair[0m
-[1;36m[10:11:27] Customer 5 takes a seat in the waiting room[0m
-[1;36m[10:11:28] Customer 5 moves to the barber chair[0m
-[1;36m[10:11:39] Customer 6 takes a seat in the waiting room[0m
-[1;36m[10:11:39] Customer 6 moves to the barber chair[0m
-[1;36m[10:11:41] Customer 7 takes a seat in the waiting room[0m
-[1;36m[10:11:41] Customer 7 moves to the barber chair[0m
-[1;36m[10:11:42] Customer 8 through Customer 9 arrive at the same time[0m
-[1;36m[10:11:42] Customer 8 takes a seat in the waiting room[0m
-[1;36m[10:11:42] Customer 9 takes a seat in the waiting room[0m
-[1;36m[10:11:43] Customer 8 moves to the barber chair[0m
-[1;36m[10:11:45] Customer 9 moves to the barber chair[0m
+[1;36m[10:24:23] Customer 1 takes a seat in the waiting room[0m
+[1;36m[10:24:23] Customer 1 moves to the barber chair[0m
+[1;36m[10:24:24] Customer 2 takes a seat in the waiting room[0m
+[1;36m[10:24:25] Customer 3 takes a seat in the waiting room[0m
+[1;36m[10:24:28] Customer 4 takes a seat in the waiting room[0m
+[1;36m[10:24:33] Customer 2 moves to the barber chair[0m
+[1;36m[10:24:38] Customer 5 takes a seat in the waiting room[0m
+[1;36m[10:24:38] Customer 6 finds no free chair and leaves[0m
+[1;36m[10:24:42] Customer 7 through Customer 8 arrive at the same time[0m
+[1;36m[10:24:42] Customer 7 finds no free chair and leaves[0m
+[1;36m[10:24:42] Customer 8 finds no free chair and leaves[0m
+[1;36m[10:24:43] Customer 3 moves to the barber chair[0m
+[1;36m[10:24:53] Customer 4 moves to the barber chair[0m
+[1;36m[10:25:03] Customer 5 moves to the barber chair[0m
